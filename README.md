@@ -35,37 +35,6 @@ queries ──1:N──► evaluation_runs ──1:N──► search_results ─
 
 ---
 
-## Key Design Decisions
-
-**Why is `evaluation_runs` separate from `queries`?**
-The same query can be re-evaluated with a different model or prompt version over time.
-Separating runs from queries lets you compare scores across model versions — which is
-exactly what a production eval harness needs.
-
-**Why PostgreSQL full-text search with ILIKE fallback?**
-`ts_rank` with `plainto_tsquery` handles stemming and ranking efficiently.
-The ILIKE fallback catches multi-word queries where individual terms do not form
-a valid tsquery — trading precision for recall at small catalog scale.
-At production scale this would be replaced with Solr or OpenSearch.
-
-**Why store `retrieval_score` on `search_results`?**
-Enables correlation analysis between BM25 retrieval score and LLM relevance score.
-Key question: does a high retrieval score predict high relevance? Early data suggests
-it does for exact matches but not for broad queries.
-
-**Why Parquet with Snappy compression for export?**
-Snappy optimises for read speed over compression ratio — correct for analytics
-workloads where repeated aggregation queries run over the same data.
-At scale this would land in S3 and be queryable via Athena or Spark.
-
-**Why MCP over a REST API for the LLM interface?**
-MCP gives the LLM structured tool definitions with typed inputs and descriptions.
-An agent can reason about which tool to call and why — enabling autonomous workflows
-like detecting degrading query quality and triggering re-evaluation without human
-intervention.
-
----
-
 ## What the data showed
 
 Running evaluations across query categories revealed:

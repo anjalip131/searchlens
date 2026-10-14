@@ -4,8 +4,6 @@ Search relevance evaluation at e-commerce scale is manual, slow, and subjective.
 Human raters take days to assess query-result quality. SearchLens automates this
 using LLM-based scoring, giving engineers instant, explainable relevance signals.
 
-Built from domain experience working on search ranking and CTR optimization at Flipkart.
-
 ---
 
 ## Architecture
@@ -34,7 +32,6 @@ queries ──1:N──► evaluation_runs ──1:N──► search_results ─
 | AI | Gemini 3.6 Flash — 0–3 IR relevance scoring |
 | Big Data | PyArrow, Parquet (Snappy), DuckDB |
 | AI Tooling | MCP server (Python) with 4 tools |
-| Dev | GitHub Codespaces, Maven |
 
 ---
 
@@ -90,18 +87,6 @@ Running evaluations across query categories revealed:
 | `list_worst_queries` | Queries ranked by lowest avg relevance score |
 | `explain_run` | Full LLM reasoning for every result in a run |
 | `list_recent_runs` | Overview of recent evaluation activity |
-
----
-
-## What I would do at production scale
-
-- Replace PostgreSQL FTS with **Apache Solr** (used in production at Flipkart)
-- Partition `evaluations` table by month for query performance at scale
-- Use **Apache Iceberg** instead of flat Parquet for ACID guarantees and time travel
-- Add an **eval harness for the LLM prompt itself** to track how prompt changes affect scoring consistency
-- Deploy backend on **Kubernetes** with HPA scaling on evaluator queue depth
-- Add **Avro + Schema Registry** to the Parquet export pipeline
-- Replace Gemini with a fine-tuned relevance model for lower latency and cost
 
 ---
 
